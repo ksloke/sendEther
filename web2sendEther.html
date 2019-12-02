@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.34/dist/web3.min.js"></script>
+</head>
+<body>
+
+  <h1>Send Ether using Web3js</h1>
+
+  <h2>Notes</h2>
+  <ul>
+    <li>Use MetaMask - address used to send will be selected at MetaMask</li>
+    <li>Select the From address in Metamask</li>
+    <li>Please connect to Kovan test net</li>
+    <li>Amount to send is in Wei : 1 ether = 1000000000000000000 wei.</li>
+    
+  </ul>
+
+  
+  <h2>Recipients Address</h2>
+  <input type="text" id="to-address" size="80"></input>
+  <p>e.g. 0x2E6801480f5f59ED5bD63e7260cF6F8651EeC6B8</p>
+
+   <h2>Amount</h2>
+  <input type="number" id="amount" size="40" value=1></input>
+
+  <div><button id="send" onclick="sendEth()">Send Ether (Wei)</button></div>
+
+  <h2>Result</h2>
+  <span id="transfer-result"></span>
+  <p></p>
+  
+  <script>
+
+    var web3;
+    var account;
+
+    function sendEth(){
+      let withdrawer = document.getElementById('to-address').value;
+      let amount=document.getElementById('amount').value; //in Wei
+      let GASLIMIT=21000;
+      let GASPRICE=1;
+      web3.eth.sendTransaction({
+        from: account,
+        to: withdrawer,
+        gasLimit: GASLIMIT,
+        gasPrice: web3.utils.toHex(web3.utils.toWei('1', 'gwei')),
+        value: amount
+        })
+        .on('error', function(err, receipt){
+            console.log('error', err);
+            document.getElementById('transfer-result').innerText="ERROR! ";
+        })
+        .on('transactionHash', function(transactionHash){
+            console.log(transactionHash);
+            document.getElementById('transfer-result').innerText="TX: "+transactionHash;
+        })
+        .on('receipt', function(receipt){
+            var transactionHash = receipt.transactionHash;
+            console.log('transactionHash', transactionHash);
+            document.getElementById('transfer-result').innerText="TX: "+transactionHash;
+        })
+        .on('confirmation', function(confirmationNumber, receipt){ 
+          console.log('confirmed '+confirmationNumber);
+          });
+    }
+  
+    window.addEventListener('load', async () => {
+    // Modern dapp browsers...
+    if (window.ethereum) {
+      window.web3 = new Web3(ethereum);
+      try {
+        // Request account access if needed
+        await ethereum.enable();
+        console.log(web3.version);
+        getAccounts();
+        // send_something();
+      } catch (error) {
+        console.log(error);
+        // User denied account access...
+      }
+    }
+    // Legacy dapp browsers...
+    else if (window.web3) {
+      window.web3 = new Web3(web3.currentProvider);
+      console.log(web3.version);
+      getaccounts();
+    }
+    // Non-dapp browsers...
+    else {
+      console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+  }
+});
+
+
+function getAccounts(){
+  var accountInterval = setInterval(function() {
+        web3.eth.getAccounts((error, address) => {
+          if (address[0] !== account) {
+            account = address[0];
+            console.log(account);
+          }
+        });
+
+      }, 300);
+
+}
+
+
+  </script>
+ <footer>
+  <p>Posted by: ksloke@gmail.com</p>
+  <p></p>
+</footer> 
+</body>
+</html>
